@@ -1,5 +1,5 @@
 # Kuba (Traboulet)
-This project features a recreation of the Kuba (aka Traboulet) board game in Python. 
+This project features a recreation of the Kuba (aka Traboulet) board game in Python. Created as a portfolio project of OSU's CS162 course.
 
 ---
 
