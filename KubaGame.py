@@ -153,248 +153,251 @@ class KubaGame:
             if self.get_winner() == None:
                 # Check 3) Just in case, check whether the direction is correctly inputted
                 if direction in ['L','R','F','B']:
-                    # Check 4) Check whether the coordinates provided is valid 
-                    if self.get_marble(coordinates) != 'X':
-                        # Check 5) Check if the marble belongs to the player
-                        if self.get_marble(coordinates):                            
-                            # Check 6) Check whether the marble at the coordinate is equal to the player's color
-                            if self.get_marble(coordinates) == player.get_player_color():                                
-                                # Check 7) Check if the move can be made (marble has a empty space next to it)
-                                north = self.get_marble((coordinates[0]-1,coordinates[1]))
-                                south = self.get_marble((coordinates[0]+1,coordinates[1]))
-                                east = self.get_marble((coordinates[0],coordinates[1]+1))
-                                west = self.get_marble((coordinates[0],coordinates[1]-1))
-                                # Check the directions and apply the moves accordingly 
-                                # IF there's empty space from the direction player push the marble from
-                                if direction == 'L':
-                                    if east == 'X':
-                                        # Move is safe to do. Perform.
-                                        current_board = copy.deepcopy(self.get_board().get_board_state())
-                                        current_board_row = current_board.get(coordinates[0]+1)                                  
-                                        # Step 1) If the left of coordinate is already empty, update accordingly
-                                        if west == 'X':
-                                            # Pop the marble to the east and insert 'X' at coordinate position
-                                            current_board_row.pop(coordinates[1]-1)
-                                            current_board_row.insert(coordinates[1], 'X')
-                                            # Update the board with the new board
-                                            counter =  self.get_game_counter()
-                                            return self.validate_board(counter, player, current_board)                                               
-                                        # Step 2) Else, check how many values to the left of the coordinate are occupied by non-X
-                                        else:
-                                            empty_pos = None
-                                            # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
-                                            for i in range(coordinates[1],-1,-1):
-                                                if current_board_row[i] == 'X':
-                                                    empty_pos = i
-                                                    break
-                                                # If it doesn't reach this point, all values are occupied to the left.
-                                                # We'd need to pop the index 0 value and insert 'X' at coordinate position
-                                            # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
-                                            if empty_pos:
-                                                current_board_row.pop(empty_pos)
-                                                current_board_row.insert(coordinates[1], 'X')                                        
-                                                # Update the board with the new board
-                                                counter = self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)                                       
-                                            # Step 3b) If all values are occupied to the left, pop left-most value and insert 'X' at coordinate position
-                                            else:
-                                                popped_marble = current_board_row.pop(0)
-                                                current_board_row.insert(coordinates[1], 'X')
-                                                # If it's 'R', add to player count
-                                                if popped_marble == 'R':
-                                                    self.add_captured(player)
-                                                # If it's 'W' your own marble, return False (invalid)
-                                                elif popped_marble == player.get_player_color():
-                                                    return False
-                                                # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
-
-                                                # Update the board with the new board
-                                                counter =  self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)                                            
-                                    # There's something blocking the move. Return False.
-                                    return False
-                                elif direction == 'R':
-                                    if west == 'X':
-                                        # Move is safe to do. Perform.
-                                        current_board = copy.deepcopy(self.get_board().get_board_state())
-                                        current_board_row = current_board.get(coordinates[0]+1)                                   
-                                        # Step 1) If the right of coordinate is already empty, update accordingly
+                    # Check 4) Check if it's the player's turn
+                    if self.get_current_turn() == player or self.get_current_turn() == None:
+                        # Check 5) Check whether the coordinates provided is valid 
+                        if self.get_marble(coordinates) != 'X':
+                            # Check 6) Check if the marble belongs to the player
+                            if self.get_marble(coordinates):                            
+                                # Check 7) Check whether the marble at the coordinate is equal to the player's color
+                                if self.get_marble(coordinates) == player.get_player_color():                                
+                                    # Check 8) Check if the move can be made (marble has a empty space next to it)
+                                    north = self.get_marble((coordinates[0]-1,coordinates[1]))
+                                    south = self.get_marble((coordinates[0]+1,coordinates[1]))
+                                    east = self.get_marble((coordinates[0],coordinates[1]+1))
+                                    west = self.get_marble((coordinates[0],coordinates[1]-1))
+                                    # Check the directions and apply the moves accordingly 
+                                    # IF there's empty space from the direction player push the marble from
+                                    if direction == 'L':
                                         if east == 'X':
-                                            # Pop the marble to the east and insert 'X' at coordinate position
-                                            current_board_row.pop(coordinates[1]+1)
-                                            current_board_row.insert(coordinates[1], 'X')
-                                            # Update the board with the new board
-                                            counter = self.get_game_counter()
-                                            return self.validate_board(counter, player, current_board)                                             
-                                        # Step 2) Else, check how many values to the right of the coordinate are occupied by non-X
-                                        else:
-                                            empty_pos = None
-                                            # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
-                                            for i in range(coordinates[1],len(current_board)):
-                                                if current_board_row[i] == 'X':
-                                                    empty_pos = i
-                                                    break
-                                                # If it doesn't reach this point, all values are occupied to the left.
-                                                # We'd need to pop the index 0 value and insert 'X' at coordinate position
-                                            # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
-                                            if empty_pos:
-                                                current_board_row.pop(empty_pos)
-                                                current_board_row.insert(coordinates[1], 'X') 
-                                                # Update the board with the new board
-                                                counter = self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)                                          
-                                            # Step 3b) If all values are occupied to the right, pop left-most value and insert 'X' at coordinate position
-                                            else:
-                                                popped_marble = current_board_row.pop(6)
+                                            # Move is safe to do. Perform.
+                                            current_board = copy.deepcopy(self.get_board().get_board_state())
+                                            current_board_row = current_board.get(coordinates[0]+1)                                  
+                                            # Step 1) If the left of coordinate is already empty, update accordingly
+                                            if west == 'X':
+                                                # Pop the marble to the east and insert 'X' at coordinate position
+                                                current_board_row.pop(coordinates[1]-1)
                                                 current_board_row.insert(coordinates[1], 'X')
-                                                # If it's 'R', add to player count
-                                                if popped_marble == 'R':
-                                                    self.add_captured(player)
-                                                # If it's 'W' your own marble, return False (invalid)
-                                                elif popped_marble == player.get_player_color():
-                                                    return False
-                                                # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
-
-                                                # Update the board with the new board
-                                                counter = self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)
-                                    # There's something blocking the move. Return False.
-                                    return False                            
-                                elif direction == 'F':
-                                    if south == 'X':
-                                        # Move is safe to do. Perform.
-                                        current_board = copy.deepcopy(self.get_board().get_board_state())
-                                        current_board_column = list()           # This will be the values for the specific column from top to bottom
-                                        # Get all the values in the coordinate's column
-                                        for value in current_board.values():
-                                            current_board_column.append(value[coordinates[1]])
-
-                                        # Step 1) If the top of coordinate is already empty, update accordingly
-                                        if north == 'X':
-                                            # Pop the marble to the north and insert 'X' at coordinate position
-                                            current_board_column.pop(coordinates[0]-1)
-                                            current_board_column.insert(coordinates[0], 'X')
-                                            # Update the current_board with the updates column values
-                                            update_counter = 0
-                                            for value in current_board.values():
-                                                value[coordinates[1]] = current_board_column[update_counter]
-                                                update_counter += 1      
-
-                                            # Update the board with the new board
-                                            counter = self.get_game_counter()
-                                            return self.validate_board(counter, player, current_board)                                                  
-                                        # Step 2) Else, check how many values to the left of the coordinate are occupied by non-X
-                                        else:
-                                            empty_pos = None
-                                            # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
-                                            for i in range(coordinates[0],-1,-1):
-                                                if current_board_column[i] == 'X':
-                                                    empty_pos = i
-                                                    break
-                                                # If it doesn't reach this point, all values are occupied to the left.
-                                                # We'd need to pop the index 0 value and insert 'X' at coordinate position
-                                            # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
-                                            if empty_pos:
-                                                current_board_column.pop(empty_pos)
-                                                current_board_column.insert(coordinates[0], 'X')
-                                                # Update the current_board with the updates column values
-                                                update_counter = 0
-                                                for value in current_board.values():
-                                                    value[coordinates[1]] = current_board_column[update_counter]
-                                                    update_counter += 1      
-                                                # Update the board with the new board
-                                                counter = self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)                                 
-                                            # Step 3b) If all values are occupied above, pop bottom value and insert 'X' at coordinate position
-                                            else:
-                                                popped_marble = current_board_column.pop(0)
-                                                current_board_column.insert(coordinates[0], 'X')
-                                                # Update the current_board with the updates column values
-                                                update_counter = 0
-                                                for value in current_board.values():
-                                                    value[coordinates[1]] = current_board_column[update_counter]
-                                                    update_counter += 1  
-                                                # If it's 'R', add to player count
-                                                if popped_marble == 'R':
-                                                    self.add_captured(player)
-                                                # If it's 'W' your own marble, return False (invalid)
-                                                elif popped_marble == player.get_player_color():
-                                                    return False
-                                                # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
-
                                                 # Update the board with the new board
                                                 counter =  self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)
-                                    # There's something blocking the move. Return False.
-                                    return False
-                                elif direction == 'B':
-                                    if north == 'X':
-                                        # Move is safe to do. Perform.
-                                        current_board = copy.deepcopy(self.get_board().get_board_state())
-                                        current_board_column = list()           # This will be the values for the specific column from top to bottom
-                                        # Get all the values in the coordinate's column
-                                        for value in current_board.values():
-                                            current_board_column.append(value[coordinates[1]])
+                                                return self.validate_board(counter, player, current_board)                                               
+                                            # Step 2) Else, check how many values to the left of the coordinate are occupied by non-X
+                                            else:
+                                                empty_pos = None
+                                                # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
+                                                for i in range(coordinates[1],-1,-1):
+                                                    if current_board_row[i] == 'X':
+                                                        empty_pos = i
+                                                        break
+                                                    # If it doesn't reach this point, all values are occupied to the left.
+                                                    # We'd need to pop the index 0 value and insert 'X' at coordinate position
+                                                # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
+                                                if empty_pos:
+                                                    current_board_row.pop(empty_pos)
+                                                    current_board_row.insert(coordinates[1], 'X')                                        
+                                                    # Update the board with the new board
+                                                    counter = self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)                                       
+                                                # Step 3b) If all values are occupied to the left, pop left-most value and insert 'X' at coordinate position
+                                                else:
+                                                    popped_marble = current_board_row.pop(0)
+                                                    current_board_row.insert(coordinates[1], 'X')
+                                                    # If it's 'R', add to player count
+                                                    if popped_marble == 'R':
+                                                        self.add_captured(player)
+                                                    # If it's 'W' your own marble, return False (invalid)
+                                                    elif popped_marble == player.get_player_color():
+                                                        return False
+                                                    # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
 
-                                        # Step 1) If the bottom of coordinate is already empty, update accordingly
+                                                    # Update the board with the new board
+                                                    counter =  self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)                                            
+                                        # There's something blocking the move. Return False.
+                                        return False
+                                    elif direction == 'R':
+                                        if west == 'X':
+                                            # Move is safe to do. Perform.
+                                            current_board = copy.deepcopy(self.get_board().get_board_state())
+                                            current_board_row = current_board.get(coordinates[0]+1)                                   
+                                            # Step 1) If the right of coordinate is already empty, update accordingly
+                                            if east == 'X':
+                                                # Pop the marble to the east and insert 'X' at coordinate position
+                                                current_board_row.pop(coordinates[1]+1)
+                                                current_board_row.insert(coordinates[1], 'X')
+                                                # Update the board with the new board
+                                                counter = self.get_game_counter()
+                                                return self.validate_board(counter, player, current_board)                                             
+                                            # Step 2) Else, check how many values to the right of the coordinate are occupied by non-X
+                                            else:
+                                                empty_pos = None
+                                                # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
+                                                for i in range(coordinates[1],len(current_board)):
+                                                    if current_board_row[i] == 'X':
+                                                        empty_pos = i
+                                                        break
+                                                    # If it doesn't reach this point, all values are occupied to the left.
+                                                    # We'd need to pop the index 0 value and insert 'X' at coordinate position
+                                                # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
+                                                if empty_pos:
+                                                    current_board_row.pop(empty_pos)
+                                                    current_board_row.insert(coordinates[1], 'X') 
+                                                    # Update the board with the new board
+                                                    counter = self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)                                          
+                                                # Step 3b) If all values are occupied to the right, pop left-most value and insert 'X' at coordinate position
+                                                else:
+                                                    popped_marble = current_board_row.pop(6)
+                                                    current_board_row.insert(coordinates[1], 'X')
+                                                    # If it's 'R', add to player count
+                                                    if popped_marble == 'R':
+                                                        self.add_captured(player)
+                                                    # If it's 'W' your own marble, return False (invalid)
+                                                    elif popped_marble == player.get_player_color():
+                                                        return False
+                                                    # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
+
+                                                    # Update the board with the new board
+                                                    counter = self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)
+                                        # There's something blocking the move. Return False.
+                                        return False                            
+                                    elif direction == 'F':
                                         if south == 'X':
-                                            # Pop the marble to the north and insert 'X' at coordinate position
-                                            current_board_column.pop(coordinates[0]+1)
-                                            current_board_column.insert(coordinates[0], 'X')
-                                            # Update the current_board with the updates column values
-                                            update_counter = 0
+                                            # Move is safe to do. Perform.
+                                            current_board = copy.deepcopy(self.get_board().get_board_state())
+                                            current_board_column = list()           # This will be the values for the specific column from top to bottom
+                                            # Get all the values in the coordinate's column
                                             for value in current_board.values():
-                                                value[coordinates[1]] = current_board_column[update_counter]
-                                                update_counter += 1      
+                                                current_board_column.append(value[coordinates[1]])
 
-                                            # Update the board with the new board
-                                            counter = self.get_game_counter()
-                                            return self.validate_board(counter, player, current_board)                                                   
-                                        # Step 2) Else, check how many values to the left of the coordinate are occupied by non-X
-                                        else:
-                                            empty_pos = None
-                                            # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
-                                            for i in range(coordinates[0],len(current_board)):
-                                                if current_board_column[i] == 'X':
-                                                    empty_pos = i
-                                                    break    
-                                                # If it doesn't reach this point, all values are occupied to the left.
-                                                # We'd need to pop the index 0 value and insert 'X' at coordinate position
-                                            # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
-                                            if empty_pos:
-                                                current_board_column.pop(empty_pos)
+                                            # Step 1) If the top of coordinate is already empty, update accordingly
+                                            if north == 'X':
+                                                # Pop the marble to the north and insert 'X' at coordinate position
+                                                current_board_column.pop(coordinates[0]-1)
                                                 current_board_column.insert(coordinates[0], 'X')
                                                 # Update the current_board with the updates column values
                                                 update_counter = 0
                                                 for value in current_board.values():
                                                     value[coordinates[1]] = current_board_column[update_counter]
                                                     update_counter += 1      
+
                                                 # Update the board with the new board
                                                 counter = self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)
-                                            # Step 3b) If all values are occupied above, pop bottom value and insert 'X' at coordinate position
+                                                return self.validate_board(counter, player, current_board)                                                  
+                                            # Step 2) Else, check how many values to the left of the coordinate are occupied by non-X
                                             else:
-                                                popped_marble = current_board_column.pop(6)
+                                                empty_pos = None
+                                                # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
+                                                for i in range(coordinates[0],-1,-1):
+                                                    if current_board_column[i] == 'X':
+                                                        empty_pos = i
+                                                        break
+                                                    # If it doesn't reach this point, all values are occupied to the left.
+                                                    # We'd need to pop the index 0 value and insert 'X' at coordinate position
+                                                # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
+                                                if empty_pos:
+                                                    current_board_column.pop(empty_pos)
+                                                    current_board_column.insert(coordinates[0], 'X')
+                                                    # Update the current_board with the updates column values
+                                                    update_counter = 0
+                                                    for value in current_board.values():
+                                                        value[coordinates[1]] = current_board_column[update_counter]
+                                                        update_counter += 1      
+                                                    # Update the board with the new board
+                                                    counter = self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)                                 
+                                                # Step 3b) If all values are occupied above, pop bottom value and insert 'X' at coordinate position
+                                                else:
+                                                    popped_marble = current_board_column.pop(0)
+                                                    current_board_column.insert(coordinates[0], 'X')
+                                                    # Update the current_board with the updates column values
+                                                    update_counter = 0
+                                                    for value in current_board.values():
+                                                        value[coordinates[1]] = current_board_column[update_counter]
+                                                        update_counter += 1  
+                                                    # If it's 'R', add to player count
+                                                    if popped_marble == 'R':
+                                                        self.add_captured(player)
+                                                    # If it's 'W' your own marble, return False (invalid)
+                                                    elif popped_marble == player.get_player_color():
+                                                        return False
+                                                    # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
+
+                                                    # Update the board with the new board
+                                                    counter =  self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)
+                                        # There's something blocking the move. Return False.
+                                        return False
+                                    elif direction == 'B':
+                                        if north == 'X':
+                                            # Move is safe to do. Perform.
+                                            current_board = copy.deepcopy(self.get_board().get_board_state())
+                                            current_board_column = list()           # This will be the values for the specific column from top to bottom
+                                            # Get all the values in the coordinate's column
+                                            for value in current_board.values():
+                                                current_board_column.append(value[coordinates[1]])
+
+                                            # Step 1) If the bottom of coordinate is already empty, update accordingly
+                                            if south == 'X':
+                                                # Pop the marble to the north and insert 'X' at coordinate position
+                                                current_board_column.pop(coordinates[0]+1)
                                                 current_board_column.insert(coordinates[0], 'X')
                                                 # Update the current_board with the updates column values
                                                 update_counter = 0
                                                 for value in current_board.values():
                                                     value[coordinates[1]] = current_board_column[update_counter]
-                                                    update_counter += 1  
-                                                # If it's 'R', add to player count
-                                                if popped_marble == 'R':
-                                                    self.add_captured(player)
-                                                # If it's 'W' your own marble, return False (invalid)
-                                                elif popped_marble == player.get_player_color():
-                                                    return False
-                                                # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
+                                                    update_counter += 1      
 
                                                 # Update the board with the new board
-                                                counter =  self.get_game_counter()
-                                                return self.validate_board(counter, player, current_board)
-                                    # There's something blocking the move. Return False.
+                                                counter = self.get_game_counter()
+                                                return self.validate_board(counter, player, current_board)                                                   
+                                            # Step 2) Else, check how many values to the left of the coordinate are occupied by non-X
+                                            else:
+                                                empty_pos = None
+                                                # For loop to find the 1st occurrent of 'X' to the left of non-'X' values
+                                                for i in range(coordinates[0],len(current_board)):
+                                                    if current_board_column[i] == 'X':
+                                                        empty_pos = i
+                                                        break    
+                                                    # If it doesn't reach this point, all values are occupied to the left.
+                                                    # We'd need to pop the index 0 value and insert 'X' at coordinate position
+                                                # Step 3a) Pop the value at the empty_pos and insert 'X' at coordinate position
+                                                if empty_pos:
+                                                    current_board_column.pop(empty_pos)
+                                                    current_board_column.insert(coordinates[0], 'X')
+                                                    # Update the current_board with the updates column values
+                                                    update_counter = 0
+                                                    for value in current_board.values():
+                                                        value[coordinates[1]] = current_board_column[update_counter]
+                                                        update_counter += 1      
+                                                    # Update the board with the new board
+                                                    counter = self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)
+                                                # Step 3b) If all values are occupied above, pop bottom value and insert 'X' at coordinate position
+                                                else:
+                                                    popped_marble = current_board_column.pop(6)
+                                                    current_board_column.insert(coordinates[0], 'X')
+                                                    # Update the current_board with the updates column values
+                                                    update_counter = 0
+                                                    for value in current_board.values():
+                                                        value[coordinates[1]] = current_board_column[update_counter]
+                                                        update_counter += 1  
+                                                    # If it's 'R', add to player count
+                                                    if popped_marble == 'R':
+                                                        self.add_captured(player)
+                                                    # If it's 'W' your own marble, return False (invalid)
+                                                    elif popped_marble == player.get_player_color():
+                                                        return False
+                                                    # If it's the opponent's marble, ignore (get_marble_count() will track the number on the board)
+
+                                                    # Update the board with the new board
+                                                    counter =  self.get_game_counter()
+                                                    return self.validate_board(counter, player, current_board)
+                                        # There's something blocking the move. Return False.
+                                        return False
+                                    # We shouldn't end up here since we've already checked the direction, but keeping return False just in case
                                     return False
-                                # We shouldn't end up here since we've already checked the direction, but keeping return False just in case
                                 return False
                             return False
                         return False
@@ -587,6 +590,13 @@ class KubaPlayer:
 def main():
     '''Runs if the file is run as script. '''
     game = KubaGame(('PlayerA', 'W'), ('PlayerB', 'B'))
+
+    # Test to check whether the turn check works
+    # print(game.make_move('PlayerA', (6, 5), 'F'))
+    # print(game.get_current_turn().get_player_name())
+    # print(game.make_move('PlayerA', (5, 5), 'F'))
+    # print(game.get_current_turn().get_player_name())
+
     # print(game.make_move('PlayerA', (6,5), 'L'))        # False
     # print(game.make_move('PlayerA', (6,6), 'L'))        # True
     # print(game.make_move('PlayerB', (6,0), 'R'))        # True
@@ -635,8 +645,9 @@ def main():
     # print(game.make_move('PlayerB', (0,5), 'B'))        # True
     # print(game.make_move('PlayerA', (4,6), 'B'))        # True
     # print(game.make_move('PlayerB', (1,5), 'B'))        # True
+    # print(game.get_winner())                            # None (no winner yet)
     # print(game.make_move('PlayerA', (5,6), 'B'))        # Win step
-    # print(game.get_player1_count())                     # Returns 6 (of 7)
+    # print(game.get_player1_count())                     # Returns 7 (of 7)
     # print(game.get_winner())                            # PlayerA
 
     # Empty the board except for one 'B' 

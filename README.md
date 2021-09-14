@@ -36,9 +36,11 @@ TBD
 ---
 
 ### Bug Log
-07/27/2021 - Currently there is a specific scenario where the turn tracking is not working as expected.
+09/13/2021 - Bugs resolved.
+
+~~07/27/2021 - Currently there is a specific scenario where the turn tracking is not working as expected.
 1. Initialize game
 2. make_move(playerA, (6, 5), “F”)
 3. make_move(playerA, (5, 5), “F”) >> Player A should not be allowed to move twice
 
-Fix TBD.
+Fix TBD.~~
